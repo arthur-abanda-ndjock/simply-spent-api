@@ -1,5 +1,6 @@
 package io.swagger.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.validation.constraints.Email;
@@ -13,15 +14,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * User
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2024-05-15T11:30:40.071880526Z[GMT]")
-
-public class User {
+@Entity
+public class User implements Serializable {
   @JsonProperty("id")
+  @Id
   private Long id = null;
 
   @JsonProperty("firstName")
