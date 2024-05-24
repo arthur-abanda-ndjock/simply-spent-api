@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -35,6 +36,7 @@ public class User implements Serializable {
   private String lastName = null;
 
   @Email
+  @Column
   @JsonProperty("emailId")
   private String emailId = null;
 

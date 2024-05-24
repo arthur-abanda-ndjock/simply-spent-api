@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.exceptions.ModelValidationException;
 import io.swagger.model.User;
 import io.swagger.model.Users;
 import io.swagger.service.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.servlet.http.HttpServletRequest;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2024-05-15T11:30:40.071880526Z[GMT]")
 @RestController
@@ -32,15 +34,12 @@ public class UsersApiController implements UsersApi {
 
     private final ObjectMapper objectMapper;
 
-    private final HttpServletRequest request;
-
     @Autowired
     private UserService userService;
 
     @Autowired
-    public UsersApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+    public UsersApiController(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.request = request;
     }
 
     public ResponseEntity<Void> createUser(
@@ -61,19 +60,20 @@ public class UsersApiController implements UsersApi {
 
     public ResponseEntity<User> showUserById(
             @Parameter(in = ParameterIn.PATH, description = "The id of the user to retrieve", required = true, schema = @Schema()) @PathVariable("userId") String userId) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<User>(objectMapper.readValue(
-                        "{\n  \"firstName\" : \"firstName\",\n  \"lastName\" : \"lastName\",\n  \"password\" : \"password\",\n  \"role\" : \"MGR\",\n  \"address\" : \"address\",\n  \"phone\" : \"phone\",\n  \"emailId\" : \"emailId\",\n  \"id\" : 0,\n  \"tag\" : \"tag\",\n  \"managerName\" : \"managerName\",\n  \"age\" : 6\n}",
-                        User.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<User>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        try {
+            return new ResponseEntity<User>(objectMapper.readValue(
+                    "{\n  \"firstName\" : \"firstName\",\n  \"lastName\" : \"lastName\",\n  \"password\" : \"password\",\n  \"role\" : \"MGR\",\n  \"address\" : \"address\",\n  \"phone\" : \"phone\",\n  \"emailId\" : \"emailId\",\n  \"id\" : 0,\n  \"tag\" : \"tag\",\n  \"managerName\" : \"managerName\",\n  \"age\" : 6\n}",
+                    User.class), HttpStatus.NOT_IMPLEMENTED);
+        } catch (IOException e) {
+            log.error("Couldn't serialize response for content type application/json", e);
+            return new ResponseEntity<User>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<User>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @ExceptionHandler(ModelValidationException.class)
+    public ResponseEntity<String> handleDetailedValidationExceptions(ModelValidationException ex) {
+        return new ResponseEntity<String>("{error-msg: " + ex.getMessage() + "}", HttpStatusCode.valueOf(ex.getCode()));
     }
 
 }
