@@ -15,7 +15,7 @@ import io.swagger.utils.PasswordHasher;
 public class UserService {
 
     private final String DUPLICATE_EMAIL_MSG = "a similar email id already exist in the database: ";
-    private final String INVALID_EMAIL_MSG = "The password should contain, at minimum, one number, one capital letter, and one special character.";
+    private final String INVALID_EMAIL_MSG = "Email Id is invalid: ";
     private final String INVALID_PASSSWORD_MSG = "The password should contain, at minimum, one number, one capital letter, and one special character.";
 
     private final UserRepository userRepository;
@@ -42,7 +42,7 @@ public class UserService {
 
     private void validate(User user) {
         if (!emailPattern.matcher(user.getEmailId()).matches()) {
-            throw new ModelValidationException(400, INVALID_EMAIL_MSG);
+            throw new ModelValidationException(400, INVALID_EMAIL_MSG + user.getEmailId());
         }
         if (!userRepository.findByEmailId(user.getEmailId()).isEmpty()) {
             throw new ModelValidationException(403,

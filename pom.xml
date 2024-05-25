@@ -17,6 +17,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <springdoc-version>1.8.0</springdoc-version>
         <jacoco.version>0.8.11</jacoco.version>
+        <activeProfile>local</activeProfile>
     </properties>
 
     <build>
