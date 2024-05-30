@@ -1,32 +1,32 @@
 # minimum base image size
 FROM eclipse-temurin:21.0.3_9-jre-jammy
 
-
-RUN apt-get update 
-RUN apt-get install -y procps
-RUN apt-get install -y dumb-init
-
 # label the images
 LABEL image.authors="arthur.ndjock"
 LABEL io.github.repo="my git repo handle"
 LABEL version="1.0"
 LABEL description="simply-spend application to monitor user spending habits"
 
+# defining env (container-scope) & args (image_build-scoped)
+ARG my_workdir=/usr/local/cross-soft
+ENV my_workdir_env=$my_workdir
 
+# installing a dumb initializer 
+RUN apt-get update && apt-get install -y procps dumb-init && rm -rf /var/lib/apt/lists/*
+
+
+# creating a least priviledged user
 RUN adduser --disabled-password --gecos "" arthur
-#RUN usermod -aG arthur arthur
-RUN 
-RUN mkdir -p /usr/local/cross-soft
-RUN chown -R :arthur /usr/local/cross-soft
-RUN chmod -R g+rw /usr/local/cross-soft
+
+RUN mkdir -p "$my_workdir"
+WORKDIR  "$my_workdir"
+RUN chown -R :arthur .
+RUN chmod -R g+rw .
 
 
 USER arthur
 
-WORKDIR /usr/local/cross-soft
-
-COPY ./target/simply-spend-api.jar /usr/local/cross-soft/simply-spend-api.jar
-
+# set up app artifact and run
+COPY ./target/simply-spend-api.jar simply-spend-api.jar
 EXPOSE 8080
-
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "java", "-jar", "/usr/local/cross-soft/simply-spend-api.jar", "--spring.profiles.active=@activeProfile@"]
+ENTRYPOINT /usr/bin/dumb-init -- java -jar ${my_workdir_env}/simply-spend-api.jar --spring.profiles.active=@activeProfile@
